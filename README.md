@@ -1,4 +1,4 @@
 wentAway
 ========
 
-To handle when user "went away" from your page for a "period" of time, or even from a specific element
+To detect when user 'went away' from your page (or even from a specific HTML element) for a 'period' of time

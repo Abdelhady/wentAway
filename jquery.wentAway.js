@@ -1,3 +1,10 @@
+/*!
+ * jQuery wentAway plugin boilerplate
+ * Original author: @abdelhady
+ * Current Version: V1.0
+ * Licensed under the MIT license
+ */
+
 // the semi-colon before the function invocation is a safety 
 // net against concatenated scripts and/or other plugins 
 // that are not closed properly.
@@ -18,53 +25,64 @@
 
     // Create the defaults once
     var pluginName = 'wentAway',
-    self = this,
     defaults = {
-        period: 2 * 60 * 1000
+        period: 5 * 60 * 1000,
+        wentAwayCallback: null,
+        isBackCallback: null
     };
     
     // The actual plugin constructor
     function Plugin( element, options ) {
-        self = this;
-        self.element = element;
+        this.element = element;
         // The first object is generally empty because we don't want to alter 
         // the default options for future instances of the plugin
-        self.options = $.extend( {}, defaults, options) ;
-        self._defaults = defaults;
-        self._name = pluginName;
-        self.init();
+        this.options = $.extend( {}, defaults, options) ;
+        this._defaults = defaults;
+        this._name = pluginName;
+        this.init();
     }
     
     // main code here
     Plugin.prototype.init = function () {
-        self.active = true;
-        self.timer = setTimeout(userInactiveCallback, self.options.period);
+        console.log('init');
+        var self = this;
+        this.active = true;
+        this.timer = setTimeout(userInactiveCallback, this.options.period);
         var events = 'mousemove click mouseup mousedown keydown keypress keyup submit change mouseenter scroll resize dblclick';
-        $(self.element).on(events, userActiveCallback);
-    }; 
+        $(this.element).on(events, userActiveCallback);
 
-    function userActiveCallback(e) {
-        if (!self.active) 
-            $(self.element).trigger("userIsBack");
-        self.active = true;
-        if (self.timer) 
-            clearTimeout(self.timer);
-        self.timer = setTimeout(userInactiveCallback, self.options.period);
-    }
+        function userActiveCallback() {
+            if (!self.active) {
+                if ( $.isFunction(self.options.isBackCallback) ) {
+                    self.options.isBackCallback.call(self);
+                }
+                $(self.element).trigger("userIsBack", [self.element]);
+            }
+            self.active = true;
+            if (self.timer) 
+                clearTimeout(self.timer);
+            self.timer = setTimeout(userInactiveCallback, self.options.period);
+        }
+
+        function userInactiveCallback() {
+            self.active = false;
+            if ( $.isFunction(self.options.wentAwayCallback) ) {
+                self.options.wentAwayCallback.call(self);
+            }
+            $(self.element).trigger("userWentAway", [self.element]);
+        }
+
+    };
     
-    function userInactiveCallback() {
-        self.active = false;
-        $(self.element).trigger("userWentAway");
-    }
 
     // A really lightweight plugin wrapper around the constructor, 
     // preventing against multiple instantiations
     $.fn[pluginName] = function ( options ) {
         return this.each(function () {
-            if (!$.data(this, 'plugin_' + pluginName)) {
+            // if (!$.data(this, 'plugin_' + pluginName)) {
                 $.data(this, 'plugin_' + pluginName, 
                     new Plugin( this, options ));
-            }
+            // }
         });
     }
 

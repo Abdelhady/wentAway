@@ -1,0 +1,12 @@
+div {
+	/*height: 30px;*/
+	background-color: #000;
+	margin: 10px;
+	color: white;
+}
+.inActive {
+	background-color: gray;
+}
+h1#away, #awayFromBox{
+	display: none;
+}
